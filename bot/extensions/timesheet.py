@@ -9,14 +9,16 @@ timesheet = lightbulb.Plugin("Timesheet")
 
 
 @timesheet.command()
-@lightbulb.command(name="hours", description="Checks that the bot is alive")
+@lightbulb.command(
+    name="hours", description="Commands related to manipulating your timesheet."
+)
 @lightbulb.implements(lightbulb.SlashCommandGroup)
 async def hours(ctx: lightbulb.Context) -> None:
     pass
 
 
 @hours.child
-@lightbulb.command(name="add", description="test subcommand")
+@lightbulb.command(name="add", description="Add hours to your timesheet.")
 @lightbulb.implements(lightbulb.SlashSubCommand)
 async def add(ctx: lightbulb.Context) -> None:
     await ctx.respond("invoked hours add")
