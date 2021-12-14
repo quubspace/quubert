@@ -1,7 +1,9 @@
 import lightbulb
 import sys
 import hikari
+import bot.database as db
 
+from bot.database.models import User
 from pathlib import Path
 from bot.utils import config
 

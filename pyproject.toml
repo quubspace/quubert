@@ -10,6 +10,9 @@ python = ">= 3.9, < 3.11"
 hikari = {extras = ["speedups"], version = "^2.0.0-alpha.104"}
 uvloop = "^0.16.0"
 hikari-lightbulb = "^2.1.0"
+gino = "^1.0.1"
+alembic = "^1.7.5"
+psycopg2-binary = "^2.9.2"
 
 [tool.poetry.dev-dependencies]
 
