@@ -3,6 +3,7 @@ import hikari
 import time
 
 from hikari import Embed
+from app.database.models import User
 
 users = lightbulb.Plugin("Users")
 

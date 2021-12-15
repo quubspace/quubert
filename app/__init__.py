@@ -1,11 +1,11 @@
 import lightbulb
 import sys
 import hikari
-import bot.database as db
+import app.database as db
 
-from bot.database.models import User
+from app.database.models import User
 from pathlib import Path
-from bot import utils, database
+from app import utils, database
 from dataclasses import dataclass
 
 __version__ = "0.1.0"

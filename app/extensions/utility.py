@@ -3,7 +3,7 @@ import hikari
 import time
 
 from hikari import Embed
-from bot import bot
+from app import bot
 
 utility = lightbulb.Plugin("Utility")
 

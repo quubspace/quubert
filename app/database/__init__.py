@@ -1,10 +1,10 @@
-from bot.utils import config
+from app.utils import config
 from gino import Gino
 
 db = Gino()
 
 # import models so Gino registers them
-import bot.database.models  # isort:skip
+import app.database.models  # isort:skip
 
 
 async def setup():

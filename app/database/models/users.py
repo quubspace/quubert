@@ -1,4 +1,4 @@
-from bot.database import db
+from app.database import db
 
 
 class User(db.Model):
