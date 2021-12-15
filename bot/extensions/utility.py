@@ -3,7 +3,7 @@ import hikari
 import time
 
 from hikari import Embed
-from bot import version, py_version
+from bot import bot
 
 utility = lightbulb.Plugin("Utility")
 
@@ -30,10 +30,10 @@ async def info(ctx: lightbulb.Context) -> None:
     embed.add_field(
         name="Software Versions",
         value=f"```py\n"
-        f"Quubert: {version}\n"
+        f"Quubert: {bot.version}\n"
         f"Hikari: {hikari.__version__}\n"
         f"Lightbulb: {lightbulb.__version__}\n"
-        f"Python: {py_version}```",
+        f"Python: {bot.py_version}```",
         inline=False,
     )
     embed.set_footer(text="Thank you for using Quubert!")

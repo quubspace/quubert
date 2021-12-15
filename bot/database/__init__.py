@@ -13,11 +13,3 @@ async def setup():
 
 async def shutdown():
     await db.pop_bind().close()
-
-
-# async def query_guild(guild_id: int):
-#     """: query guild, create if not exist"""
-#     guild = await models.Guild.get(guild_id)
-#     if guild is None:
-#         guild = await models.Guild.create(id=guild_id)
-#     return guild

@@ -5,14 +5,38 @@ import bot.database as db
 
 from bot.database.models import User
 from pathlib import Path
-from bot.utils import config
+from bot import utils, database
+from dataclasses import dataclass
 
-bot = lightbulb.BotApp(token=config.token)
+__version__ = "0.1.0"
 
-version = "0.1.0"
-py_version = (
-    f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+
+@dataclass
+class Bot:
+    app: lightbulb.BotApp
+    user_data: dict
+    py_version: str
+    version: str
+
+
+bot = Bot(
+    app=lightbulb.BotApp(token=utils.config.token),
+    user_data={},
+    py_version=f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+    version=__version__,
 )
+
+
+async def preload_user_data():
+    users = await User.query.gino.all()
+    return {f"{user.id}": user for user in users}
+
+
+@bot.app.listen()
+async def on_ready(event: hikari.StartedEvent):
+    await database.setup()
+    bot.user_data = await preload_user_data()
+    print(f"Logged in as {bot.app.get_me()}.")
 
 
 def extensions():
@@ -30,5 +54,5 @@ def load_extensions(_bot):
 
 
 def run():
-    load_extensions(bot)
-    bot.run()
+    load_extensions(bot.app)
+    bot.app.run()

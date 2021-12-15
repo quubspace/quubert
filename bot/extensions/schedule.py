@@ -3,7 +3,6 @@ import hikari
 import time
 
 from hikari import Embed
-from bot import version, py_version
 
 scheduling = lightbulb.Plugin("Scheduling")
 
