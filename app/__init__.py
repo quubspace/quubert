@@ -1,23 +1,15 @@
 import lightbulb
+import logging
 import sys
 import hikari
 import app.database as db
 
 from app.database.models import User
-from pathlib import Path
 from app import utils, database
+from app.bot import Bot
 from dataclasses import dataclass
 
 __version__ = "0.1.0"
-
-
-@dataclass
-class Bot:
-    app: lightbulb.BotApp
-    user_data: dict
-    py_version: str
-    version: str
-
 
 bot = Bot(
     app=lightbulb.BotApp(token=utils.config.token),
@@ -36,23 +28,4 @@ async def preload_user_data():
 async def on_ready(event: hikari.StartedEvent):
     await database.setup()
     bot.user_data = await preload_user_data()
-    print(f"Logged in as {bot.app.get_me()}.")
-
-
-def extensions():
-    files = Path("bot", "extensions").rglob("*.py")
-    for file in files:
-        yield file.as_posix()[:-3].replace("/", ".")
-
-
-def load_extensions(_bot):
-    for ext in extensions():
-        try:
-            _bot.load_extensions(ext)
-        except Exception as ex:
-            print(f"Failed to load extension {ext} - exception: {ex}")
-
-
-def run():
-    load_extensions(bot.app)
-    bot.app.run()
+    logging.info(f"Logged in as {bot.app.get_me()}.")

@@ -23,9 +23,9 @@ async def add(ctx: lightbulb.Context) -> None:
     await ctx.respond("invoked hours add")
 
 
-def load(bot):
+def load(bot) -> None:
     bot.add_plugin(timesheet)
 
 
-def unload(bot):
+def unload(bot) -> None:
     bot.remove_plugin(timesheet)

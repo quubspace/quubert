@@ -48,9 +48,9 @@ async def echo(ctx: lightbulb.Context) -> None:
     await ctx.respond(ctx.options.text)
 
 
-def load(bot):
+def load(bot) -> None:
     bot.add_plugin(utility)
 
 
-def unload(bot):
+def unload(bot) -> None:
     bot.remove_plugin(utility)

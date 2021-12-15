@@ -15,8 +15,8 @@ config = context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from bot.utils import config as my_config  # isort:skip
-from bot.database import db  # isort:skip
+from app.utils import config as my_config  # isort:skip
+from app.database import db  # isort:skip
 
 config.set_main_option("sqlalchemy.url", my_config.database)
 
