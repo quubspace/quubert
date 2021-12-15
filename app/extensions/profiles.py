@@ -3,7 +3,7 @@ import hikari
 import time
 
 from hikari import Embed
-from app.player import User
+from app.user import User
 
 profiles = lightbulb.Plugin("Profiles")
 
