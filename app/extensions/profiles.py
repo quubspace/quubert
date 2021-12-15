@@ -4,6 +4,8 @@ import time
 
 from hikari import Embed
 from app.user import User
+from app.utils.helpers import check_registration
+from app import bot
 
 profiles = lightbulb.Plugin("Profiles")
 
@@ -28,6 +30,30 @@ async def verify(ctx: lightbulb.Context) -> None:
         await ctx.respond("Successfully verified!")
     except Exception as e:
         await ctx.respond(f"There was an error in verifying you: {e}")
+
+
+@profiles.command()
+@lightbulb.command(
+    name="update", description="Commands related to updating your profile.."
+)
+@lightbulb.implements(lightbulb.SlashCommandGroup)
+async def update(ctx: lightbulb.Context) -> None:
+    if await check_registration(ctx.author.id):
+        pass
+    else:
+        return
+
+
+@update.child
+@lightbulb.option(
+    name="new_email", description="Your Quub-issued email.", type=str, required=True
+)
+@lightbulb.command(name="email", description="Update the email on your profile.")
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def email(ctx: lightbulb.Context) -> None:
+    user = await User.load(user_id=ctx.author.id)
+    await user.update_email(ctx.options.new_email)
+    await ctx.respond(f"Your new email: {bot.user_data[ctx.author.id].email}")
 
 
 def load(bot) -> None:

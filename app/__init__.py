@@ -23,7 +23,7 @@ bot = Bot(
 
 async def preload_user_data():
     users = await User.query.gino.all()
-    return {f"{user.id}": user for user in users}
+    return {user.id: user for user in users}
 
 
 async def sync_user_data():

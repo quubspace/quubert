@@ -1,6 +1,7 @@
 from typing import Tuple, Union, List, Optional
 from app.database.models import User as UserModel
 from dataclasses import dataclass
+from app import bot
 
 
 @dataclass
@@ -24,13 +25,25 @@ class User:
         if user_obj:
             user_db = user_obj
         else:
-            user_db = await UserModel.query.where(UserModel.id == user_id).gino.first()
-            if user_db is None:
-                user_db = await UserModel.create(id=user_id, name=name, email=email)
-        user = User(
-            id=user_db.id, name=user_db.name, email=user_db.email, db_object=user_obj
+            # user_db = await UserModel.query.where(UserModel.id == user_id).gino.first()
+            try:
+                user_db = bot.user_data[user_id]
+            except KeyError:
+                bot.user_data[user_id] = await UserModel.create(
+                    id=user_id, name=name, email=email
+                )
+                user_db = bot.user_data[user_id]
+        user = cls(
+            id=user_db.id,
+            name=user_db.name,
+            email=user_db.email,
+            db_object=bot.user_data[user_id],
         )
         if db_object:
             return user, user_db
         else:
             return user
+
+    async def update_email(self, new_email: str) -> None:
+        await self.db_object.update(email=new_email).apply()
+        await bot.user_data[self.id].update(email=new_email).apply()
