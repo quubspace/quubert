@@ -3,6 +3,7 @@ import hikari
 import time
 
 from hikari import Embed
+from app.utils.helpers import check_registration
 
 timesheet = lightbulb.Plugin("Timesheet")
 
@@ -13,7 +14,10 @@ timesheet = lightbulb.Plugin("Timesheet")
 )
 @lightbulb.implements(lightbulb.SlashCommandGroup)
 async def hours(ctx: lightbulb.Context) -> None:
-    pass
+    if await check_registration(ctx.author.id):
+        pass
+    else:
+        return
 
 
 @hours.child
