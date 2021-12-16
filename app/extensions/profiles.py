@@ -56,6 +56,18 @@ async def email(ctx: lightbulb.Context) -> None:
     await ctx.respond(f"Your new email: {bot.user_data[ctx.author.id].email}")
 
 
+@update.child
+@lightbulb.option(
+    name="new_name", description="Your full name: John Doe", type=str, required=True
+)
+@lightbulb.command(name="name", description="Update the name on your profile.")
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def name(ctx: lightbulb.Context) -> None:
+    user = await User.load(user_id=ctx.author.id)
+    await user.update_name(ctx.options.new_name)
+    await ctx.respond(f"Your new name: {bot.user_data[ctx.author.id].name}")
+
+
 def load(bot) -> None:
     bot.add_plugin(profiles)
 

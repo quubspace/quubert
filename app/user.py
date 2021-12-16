@@ -25,7 +25,6 @@ class User:
         if user_obj:
             user_db = user_obj
         else:
-            # user_db = await UserModel.query.where(UserModel.id == user_id).gino.first()
             try:
                 user_db = bot.user_data[user_id]
             except KeyError:
@@ -47,3 +46,7 @@ class User:
     async def update_email(self, new_email: str) -> None:
         await self.db_object.update(email=new_email).apply()
         await bot.user_data[self.id].update(email=new_email).apply()
+
+    async def update_name(self, new_name: str) -> None:
+        await self.db_object.update(name=new_name).apply()
+        await bot.user_data[self.id].update(name=new_name).apply()
