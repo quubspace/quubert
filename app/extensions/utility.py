@@ -12,7 +12,6 @@ utility = lightbulb.Plugin("Utility")
 @lightbulb.command(name="ping", description="Checks that the bot is alive")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx: lightbulb.Context) -> None:
-    """Checks that the bot is alive"""
     embed = Embed(title="Ping", description="Speed and latency of bot.")
     before_time = time.time()
     msg = await ctx.respond(embed=embed)
@@ -25,7 +24,6 @@ async def ping(ctx: lightbulb.Context) -> None:
 @lightbulb.command(name="info", description="Displays basic information about the bot.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def info(ctx: lightbulb.Context) -> None:
-    """Shows stats and infos about the bot"""
     embed = Embed(title="Quubert", description="Information about Quubert bot.")
     embed.add_field(
         name="Software Versions",

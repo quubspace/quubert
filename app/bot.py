@@ -1,6 +1,6 @@
-import lightbulb
-
 from pathlib import Path
+
+import lightbulb
 
 
 def extensions():
@@ -19,10 +19,16 @@ def load_extensions(_bot):
 
 class Bot:
     def __init__(
-        self, app: lightbulb.BotApp, user_data: dict, py_version: str, version: str
+        self,
+        app: lightbulb.BotApp,
+        user_data: dict,
+        hours_data: dict,
+        py_version: str,
+        version: str,
     ):
         self.app = app
         self.user_data = user_data
+        self.hours_data = hours_data
         self.py_version = py_version
         self.version = version
 

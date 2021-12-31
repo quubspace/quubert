@@ -1,16 +1,19 @@
-import lightbulb
-import hikari
 import time
 
-from hikari import Embed
+import hikari
+import lightbulb
+import pandas as pd
+from app.hours import Hours
 from app.utils.helpers import check_registration
+from hikari import Embed
 
 timesheet = lightbulb.Plugin("Timesheet")
 
 
 @timesheet.command()
 @lightbulb.command(
-    name="hours", description="Commands related to manipulating your timesheet."
+    name="hours",
+    description="Commands related to manipulating your timesheet.",
 )
 @lightbulb.implements(lightbulb.SlashCommandGroup)
 async def hours(ctx: lightbulb.Context) -> None:
@@ -18,6 +21,14 @@ async def hours(ctx: lightbulb.Context) -> None:
         pass
     else:
         return
+
+
+@hours.child
+@lightbulb.command(name="query", description="Check the hours in timesheet.")
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def query(ctx: lightbulb.Context) -> None:
+    hours = await Hours.load(user_id=ctx.author.id)
+    await ctx.respond(f"You have worked {hours.quantity} hours.")
 
 
 @hours.child

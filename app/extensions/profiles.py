@@ -68,6 +68,19 @@ async def name(ctx: lightbulb.Context) -> None:
     await ctx.respond(f"Your new name: {bot.user_data[ctx.author.id].name}")
 
 
+@profiles.command()
+@lightbulb.command(
+    name="profile",
+    description="Displays basic information about a profile.",
+)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def info(ctx: lightbulb.Context) -> None:
+    user = await User.load(user_id=ctx.author.id)
+    embed = Embed(title=user.name, description=f"Email: `{user.email}`")
+    embed.set_footer(text="Thank you for using Quubert!")
+    await ctx.respond(embed=embed)
+
+
 def load(bot) -> None:
     bot.add_plugin(profiles)
 
