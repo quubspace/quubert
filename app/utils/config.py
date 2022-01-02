@@ -2,8 +2,8 @@ import json
 import os
 
 default_config = {
-    "token": "",
     "database": "",
+    "email": "",
 }
 
 
@@ -16,12 +16,12 @@ class Config:
                 json.dump(default_config, file)
         with open(filename) as file:
             self.config = json.load(file)
-        self.token = self.config.get("token", default_config.get("token"))
+        self.email = self.config.get("email", default_config.get("email"))
         self.database = self.config.get("database", default_config.get("database"))
 
     def store(self):
         c = {
-            "token": self.token,
+            "email": self.email,
             "database": self.database,
         }
         with open(self.filename, "w") as file:
