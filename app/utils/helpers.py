@@ -39,3 +39,7 @@ async def sync_data():
         except:  # No idea why this is necessary, but breaks without it
             pass
         await asyncio.sleep(300)
+
+
+async def send_timesheets():
+    pass

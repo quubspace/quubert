@@ -8,4 +8,4 @@ class Hours(db.Model):
     user_id = db.Column(db.ForeignKey("users.id"))
     quantity = db.Column(db.BIGINT)
     description = db.Column(db.Text)
-    date = db.Column(db.DateTime)
+    date = db.Column(db.Date)
