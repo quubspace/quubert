@@ -22,10 +22,8 @@ class Hours:
         quantity: int = 0,
         description: str = None,
         date: datetime = None,
-    ) -> List["Hours"]:
+    ) -> Optional[List["Hours"]]:
         """Load a list of hours objects from the last week through user_id."""
-        hours_db = bot.hours_data[user_id]
-
         all_hours = (
             await HoursModel.query.where(HoursModel.user_id == user_id)
             .where(HoursModel.date <= datetime.now())
@@ -40,7 +38,7 @@ class Hours:
                 quantity=hours_db.quantity,
                 description=hours_db.description,
                 date=hours_db.date,
-                db_object=bot.hours_data[user_id],
+                db_object=hours_db,
             )
             for hours_db in all_hours
         ]
