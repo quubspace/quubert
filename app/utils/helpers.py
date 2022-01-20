@@ -9,6 +9,7 @@ import pandas as pd
 
 from app.user import User
 from datetime import date, timedelta
+from typing import List
 from app.utils import config
 from app.database.models import Hours as HoursModel, User as UserModel
 from app.bot import Bot
@@ -48,34 +49,41 @@ async def preload_data():
 
 
 # TODO: Check if there are hours to export
-async def hours_to_export() -> bool:
-    for hours in bot.hours_data.items():
-        pass
-    return True
+async def hours_to_export() -> List:
+    return list(
+        set(
+            tuple((hours.user_id, hours))
+            for hours in bot.hours_data.values()
+            if hours.date <= date.today()
+            if hours.date >= (date.today() - timedelta(days=7))
+        )
+    )
 
 
 async def send_timesheets():
     while True:
         # HACK: Change this to 300 for prod
-        await asyncio.sleep(10)
+        await asyncio.sleep(5)
         # TODO: Export to email
-        if await hours_to_export():
+        if hours_list := await hours_to_export():
             logging.info("Emailing all current hours.")
 
             context = ssl.create_default_context()
             message = ""
 
-            users_w_hours = [
-                hours.user_id
-                for hours in bot.hours_data.values()
-                if hours.date <= date.today()
-                if hours.date >= (date.today() - timedelta(days=7))
-            ]
+            users_hours = {
+                user_id: tuple((bot.user_data[user_id], []))
+                for (user_id, _) in hours_list
+            }
 
-            logging.info(users_w_hours)
+            for (user_id, hours) in hours_list:
+                users_hours[user_id][1].append(hours)
 
-            for (user_id, user) in bot.user_data.items():
-                logging.info(user)
+            for (user, hours) in users_hours.values():
+                message += f"{user.name} has worked {sum([x.quantity for x in hours])} hours this week. In detail:\n"
+                for entry in hours:
+                    message += f"- {entry.date}: {entry.quantity} hours, {entry.description if entry.description else 'no description provided'}\n"
+                message += "\n"
 
             # HACK: Uncomment when ready to start sending
             # with smtplib.SMTP_SSL(
