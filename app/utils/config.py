@@ -3,7 +3,12 @@ import os
 
 default_config = {
     "token": "",
-    "email": "",
+    "sender_email": "",
+    "smtp_host": "",
+    "email_port": "",
+    "email_password": "",
+    "receiver_email": "",
+    "next_check": "0",
     "database": "",
 }
 
@@ -17,15 +22,37 @@ class Config:
                 json.dump(default_config, file)
         with open(filename) as file:
             self.config = json.load(file)
+
         self.token = self.config.get("token", default_config.get("token"))
-        self.email = self.config.get("email", default_config.get("email"))
+        self.sender_email = self.config.get(
+            "sender_email", default_config.get("sender_email")
+        )
+        self.smtp_host = self.config.get("smtp_host", default_config.get("smtp_host"))
+        self.email_port = self.config.get(
+            "email_port", default_config.get("email_port")
+        )
+        self.email_password = self.config.get(
+            "email_password", default_config.get("email_password")
+        )
+        self.receiver_email = self.config.get(
+            "receiver_email", default_config.get("receiver_email")
+        )
+        self.next_check = self.config.get(
+            "next_check", default_config.get("next_check")
+        )
         self.database = self.config.get("database", default_config.get("database"))
 
     def store(self):
         c = {
             "token": self.token,
-            "email": self.email,
+            "sender_email": self.sender_email,
+            "smtp_host": self.smtp_host,
+            "email_port": self.email_port,
+            "email_password": self.email_password,
+            "receiver_email": self.receiver_email,
+            "next_check": self.next_check,
             "database": self.database,
         }
+
         with open(self.filename, "w") as file:
             json.dump(c, file)

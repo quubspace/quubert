@@ -1,9 +1,18 @@
 import lightbulb
 import asyncio
+import logging
+import copy
+import smtplib
+import ssl
 import app.database as db
+import pandas as pd
 
 from app.user import User
+from datetime import date, timedelta
+from app.utils import config
 from app.database.models import Hours as HoursModel, User as UserModel
+from app.bot import Bot
+from app import bot
 
 
 async def check_registration(ctx: lightbulb.Context, user_id: int):
@@ -27,19 +36,62 @@ async def preload_hours_data():
     return {hours.id: hours for hours in all_hours}
 
 
-async def sync_data():
-    while True:
-        try:
-            user_data = await preload_user_data()
-            if user_data:
-                bot.user_data = user_data
-            hours_data = await preload_hours_data()
-            if hours_data:
-                bot.hours_data = hours_data
-        except:  # No idea why this is necessary, but breaks without it
-            pass
-        await asyncio.sleep(300)
+async def preload_data():
+    try:
+        user_data = await preload_user_data()
+        bot.user_data = user_data
+
+        hours_data = await preload_hours_data()
+        bot.hours_data = hours_data
+    except:  # No idea why this is necessary, but breaks without it
+        pass
+
+
+# TODO: Check if there are hours to export
+async def hours_to_export() -> bool:
+    for hours in bot.hours_data.items():
+        pass
+    return True
 
 
 async def send_timesheets():
-    pass
+    while True:
+        # HACK: Change this to 300 for prod
+        await asyncio.sleep(10)
+        # TODO: Export to email
+        if await hours_to_export():
+            logging.info("Emailing all current hours.")
+
+            context = ssl.create_default_context()
+            message = ""
+
+            users_w_hours = [
+                hours.user_id
+                for hours in bot.hours_data.values()
+                if hours.date <= date.today()
+                if hours.date >= (date.today() - timedelta(days=7))
+            ]
+
+            logging.info(users_w_hours)
+
+            for (user_id, user) in bot.user_data.items():
+                logging.info(user)
+
+            # HACK: Uncomment when ready to start sending
+            # with smtplib.SMTP_SSL(
+            #     config.smtp_host, config.email_port, context=context
+            # ) as server:
+            #     server.login(config.sender_email, config.email_password)
+            #     server.sendmail(config.sender_email, config.receiver_email, message)
+
+    # user_data = pd.read_sql_table("users", con=config.database)
+    # hours_data = pd.read_sql_table("hours", con=config.database)
+
+    # HACK: No need to wait during testing, but don't forget to uncomment for prod
+    # if config.next_check == 0:
+    #     td = timedelta(days=7)
+    #     config.next_check = datetime.timestamp(datetime.utcnow() + td)
+    #     config.store()
+    # next_check = datetime.fromtimestamp(config.next_check)
+    # wait = (next_check - datetime.utcnow()).total_seconds()
+    # await asyncio.sleep(wait)

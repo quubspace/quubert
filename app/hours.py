@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import List, Optional, Tuple, Union
 
 from app import bot
@@ -26,8 +26,8 @@ class Hours:
         """Load a list of hours objects from the last week through user_id."""
         all_hours = (
             await HoursModel.query.where(HoursModel.user_id == user_id)
-            .where(HoursModel.date <= datetime.now())
-            .where(HoursModel.date >= (datetime.now() - timedelta(days=7)))
+            .where(HoursModel.date <= date.today())
+            .where(HoursModel.date >= (date.today() - timedelta(days=7)))
             .gino.all()
         )
 

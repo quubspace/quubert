@@ -1,3 +1,5 @@
+import logging
+
 from typing import Tuple, Union, List, Optional
 from app.database.models import User as UserModel
 from dataclasses import dataclass
@@ -27,7 +29,8 @@ class User:
         else:
             try:
                 user_db = bot.user_data[user_id]
-            except KeyError:
+            except Exception as e:
+                logging.info(f"Excepting, continuing to create model: {e}")
                 bot.user_data[user_id] = await UserModel.create(
                     id=user_id, name=name, email=email
                 )
