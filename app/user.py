@@ -48,8 +48,8 @@ class User:
 
     async def update_email(self, new_email: str) -> None:
         await self.db_object.update(email=new_email).apply()
-        await bot.user_data[self.id].update(email=new_email).apply()
+        bot.user_data[self.id].email = new_email
 
     async def update_name(self, new_name: str) -> None:
         await self.db_object.update(name=new_name).apply()
-        await bot.user_data[self.id].update(name=new_name).apply()
+        bot.user_data[self.id].name = new_name
