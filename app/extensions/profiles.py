@@ -4,6 +4,7 @@ import time
 
 from hikari import Embed
 from app.user import User
+from app.utils import config
 from app.utils.helpers import check_registration
 from app import bot
 
@@ -23,6 +24,12 @@ profiles = lightbulb.Plugin("Profiles")
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def verify(ctx: lightbulb.Context) -> None:
+    print(bot.user_data)
+    print(bot.hours_data)
+    print(ctx.author.id)
+    if ctx.author.id in bot.user_data.keys():
+        await ctx.respond("You are already verified!")
+        return
     try:
         await User.load(
             user_id=ctx.author.id, name=ctx.options.name, email=ctx.options.email
@@ -68,6 +75,24 @@ async def name(ctx: lightbulb.Context) -> None:
     await ctx.respond(f"Your new name: {bot.user_data[ctx.author.id].name}")
 
 
+@update.child
+@lightbulb.option(
+    name="email",
+    description="The email to send the timesheets to each week.",
+    type=str,
+    required=True,
+)
+@lightbulb.command(
+    name="timesheet_email",
+    description="Change the email that receives timesheets weekly.",
+)
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def timesheet_email(ctx: lightbulb.Context) -> None:
+    config.receiver_email = ctx.options.email
+    config.store()
+    await ctx.respond(f"The receiving email has been updated to {ctx.options.email}.")
+
+
 @profiles.command()
 @lightbulb.command(
     name="profile",
@@ -81,9 +106,9 @@ async def info(ctx: lightbulb.Context) -> None:
     await ctx.respond(embed=embed)
 
 
-def load(bot) -> None:
-    bot.add_plugin(profiles)
+def load(app) -> None:
+    app.add_plugin(profiles)
 
 
-def unload(bot) -> None:
-    bot.remove_plugin(profiles)
+def unload(app) -> None:
+    app.remove_plugin(profiles)

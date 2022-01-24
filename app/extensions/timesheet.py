@@ -12,17 +12,6 @@ timesheet = lightbulb.Plugin("Timesheet")
 
 
 @timesheet.command()
-@lightbulb.add_checks(lightbulb.owner_only)
-@lightbulb.command(
-    name="timesheet_email",
-    description="The email to send the timesheets to each week",
-)
-@lightbulb.implements(lightbulb.SlashCommandGroup)
-async def timesheet_email():
-    pass
-
-
-@timesheet.command()
 @lightbulb.command(
     name="hours",
     description="Commands related to manipulating your timesheet.",
