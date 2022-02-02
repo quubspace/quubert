@@ -8,7 +8,7 @@ import app.database as db
 import pandas as pd
 
 from app.user import User
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from typing import List
 from app.utils import config
 from app.database.models import Hours as HoursModel, User as UserModel
@@ -50,10 +50,15 @@ async def preload_data():
 
 # TODO: Check if there are hours to export
 async def hours_to_export() -> List:
+    try:
+        bot_hours = bot.hours_data.values()
+    except AttributeError:
+        bot_hours = []
+
     return list(
         set(
             tuple((hours.user_id, hours))
-            for hours in bot.hours_data.values()
+            for hours in bot_hours
             if hours.date <= date.today()
             if hours.date >= (date.today() - timedelta(days=7))
         )
@@ -62,14 +67,23 @@ async def hours_to_export() -> List:
 
 async def send_timesheets():
     while True:
-        # HACK: Change this to 300 for prod
         await asyncio.sleep(5)
-        # TODO: Export to email
+
         if hours_list := await hours_to_export():
+            if (
+                config.smtp_host is None
+                or config.email_port is None
+                or config.sender_email is None
+                or config.receiver_email is None
+                or config.email_password is None
+            ):
+                logging.warning("Config not complete. Not sending any timesheets.")
+                return
+
             logging.info("Emailing all current hours.")
 
             context = ssl.create_default_context()
-            message = ""
+            message = f"SUBJECT: Quub Timesheets for Week of {date.today() - timedelta(days=7)} to {date.today()}\n\n"
 
             users_hours = {
                 user_id: tuple((bot.user_data[user_id], []))
@@ -83,23 +97,20 @@ async def send_timesheets():
                 message += f"{user.name} has worked {sum([x.quantity for x in hours])} hours this week. In detail:\n"
                 for entry in hours:
                     message += f"- {entry.date}: {entry.quantity} hours, {entry.description if entry.description else 'no description provided'}\n"
-                message += "\n"
+                    message += "\n"
 
-            # HACK: Uncomment when ready to start sending
-            # with smtplib.SMTP_SSL(
-            #     config.smtp_host, config.email_port, context=context
-            # ) as server:
-            #     server.login(config.sender_email, config.email_password)
-            #     server.sendmail(config.sender_email, config.receiver_email, message)
+            with smtplib.SMTP_SSL(
+                config.smtp_host, config.email_port, context=context
+            ) as server:
+                server.login(config.sender_email, config.email_password)
+                server.sendmail(config.sender_email, config.receiver_email, message)
+        else:
+            logging.info("No hours to send.")
 
-    # user_data = pd.read_sql_table("users", con=config.database)
-    # hours_data = pd.read_sql_table("hours", con=config.database)
-
-    # HACK: No need to wait during testing, but don't forget to uncomment for prod
-    # if config.next_check == 0:
-    #     td = timedelta(days=7)
-    #     config.next_check = datetime.timestamp(datetime.utcnow() + td)
-    #     config.store()
-    # next_check = datetime.fromtimestamp(config.next_check)
-    # wait = (next_check - datetime.utcnow()).total_seconds()
-    # await asyncio.sleep(wait)
+        if int(config.next_check) == 0:
+            td = timedelta(days=7)
+            config.next_check = datetime.timestamp(datetime.utcnow() + td)
+            config.store()
+        next_check = datetime.fromtimestamp(int(config.next_check))
+        wait = (next_check - datetime.utcnow()).total_seconds()
+        await asyncio.sleep(wait)

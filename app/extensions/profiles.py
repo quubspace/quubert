@@ -24,9 +24,6 @@ profiles = lightbulb.Plugin("Profiles")
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def verify(ctx: lightbulb.Context) -> None:
-    print(bot.user_data)
-    print(bot.hours_data)
-    print(ctx.author.id)
     if ctx.author.id in bot.user_data.keys():
         await ctx.respond("You are already verified!")
         return
