@@ -75,24 +75,6 @@ async def name(ctx: lightbulb.Context) -> None:
     await ctx.respond(f"Your new name: {bot.user_data[ctx.author.id].name}")
 
 
-@update.child
-@lightbulb.option(
-    name="email",
-    description="The email to send the timesheets to each week.",
-    type=str,
-    required=True,
-)
-@lightbulb.command(
-    name="timesheet_email",
-    description="Change the email that receives timesheets weekly.",
-)
-@lightbulb.implements(lightbulb.SlashSubCommand)
-async def timesheet_email(ctx: lightbulb.Context) -> None:
-    config.receiver_email = ctx.options.email
-    config.store()
-    await ctx.respond(f"The receiving email has been updated to {ctx.options.email}.")
-
-
 @profiles.command()
 @lightbulb.command(
     name="profile",
