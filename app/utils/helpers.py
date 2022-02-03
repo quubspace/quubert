@@ -8,6 +8,7 @@ import app.database as db
 import pandas as pd
 
 from app.user import User
+from app.hours import Hours
 from datetime import date, timedelta, datetime
 from typing import List
 from app.utils import config
@@ -48,7 +49,20 @@ async def preload_data():
         pass
 
 
-# TODO: Check if there are hours to export
+async def query_hours(author_id: int, ctx: lightbulb.Context):
+    hours = await Hours.load(user_id=author_id)
+    if hours:
+        hours_min = sum([x.quantity for x in hours])
+        minutes = hours_min % 60
+        hours = hours_min // 60
+
+        quantity = f"{hours} hours and {minutes} minutes"
+    else:
+        quantity = "no hours"
+
+    await ctx.respond(f"You have worked {quantity} this week.")
+
+
 async def hours_to_export() -> List:
     try:
         bot_hours = bot.hours_data.values()
@@ -94,10 +108,26 @@ async def send_timesheets():
                 users_hours[user_id][1].append(hours)
 
             for (user, hours) in users_hours.values():
-                message += f"{user.name} has worked {sum([x.quantity for x in hours])} hours this week. In detail:\n"
+                total_hours_min = sum([x.quantity for x in hours])
+                total_minutes = total_hours_min % 60
+                total_hours_num = total_hours_min // 60
+
+                total_quantity = f"{total_hours_num} hours and {total_minutes} minutes"
+
+                message += (
+                    f"{user.name} has worked {total_quantity} this week. In detail:\n"
+                )
+
                 for entry in hours:
-                    message += f"- {entry.date}: {entry.quantity} hours, {entry.description if entry.description else 'no description provided'}\n"
-                    message += "\n"
+                    hours_min = entry.quantity
+                    minutes = hours_min % 60
+                    hours_num = hours_min // 60
+
+                    quantity = f"{hours_num} hours and {minutes} minutes"
+
+                    message += f"- {entry.date}: {quantity}, {entry.description if entry.description else 'no description provided'}\n"
+
+                message += "\n"
 
             with smtplib.SMTP_SSL(
                 config.smtp_host, config.email_port, context=context

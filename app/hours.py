@@ -1,3 +1,5 @@
+import logging
+
 from dataclasses import dataclass
 from datetime import datetime, timedelta, date
 from typing import List, Optional, Tuple, Union
@@ -21,15 +23,19 @@ class Hours:
         user_id: int = None,
         quantity: int = 0,
         description: str = None,
-        date: datetime = None,
+        datetime_obj: datetime = None,
     ) -> Optional[List["Hours"]]:
         """Load a list of hours objects from the last week through user_id."""
-        all_hours = (
-            await HoursModel.query.where(HoursModel.user_id == user_id)
-            .where(HoursModel.date <= date.today())
-            .where(HoursModel.date >= (date.today() - timedelta(days=7)))
-            .gino.all()
-        )
+        try:
+            all_hours = (
+                await HoursModel.query.where(HoursModel.user_id == user_id)
+                .where(HoursModel.date <= date.today())
+                .where(HoursModel.date >= (date.today() - timedelta(days=7)))
+                .gino.all()
+            )
+        except AttributeError as e:
+            logging.warning(e)
+            all_hours = []
 
         return [
             cls(
@@ -45,14 +51,18 @@ class Hours:
 
     @classmethod
     async def add(
-        cls, user_id: int, quantity: int, date: datetime, description: str = None
+        cls,
+        user_id: int,
+        quantity: int,
+        datetime_obj: datetime,
+        description: str = None,
     ) -> "Hours":
         """Add hours to database, and return Hours object."""
         bot.hours_data[user_id] = await HoursModel.create(
             user_id=user_id,
             quantity=quantity,
             description=description,
-            date=date,
+            date=datetime_obj,
         )
         hours_db = bot.hours_data[user_id]
 
