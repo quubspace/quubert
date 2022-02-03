@@ -5,7 +5,10 @@ import hikari
 import lightbulb
 
 from app import database, utils
-from app.utils.helpers import preload_user_data, preload_hours_data, sync_data
+from app.utils.helpers import (
+    preload_data,
+    send_timesheets,
+)
 from app.bot import Bot
 
 
@@ -24,9 +27,10 @@ bot = Bot(
 @bot.app.listen()
 async def on_ready(event: hikari.StartedEvent):
     await database.setup()
-    bot.user_data = await preload_user_data()
-    bot.hours_data = await preload_hours_data()
+    await preload_data()
 
-    asyncio.ensure_future(sync_data())
+    # Wait for bot to finish initial sync
+    await asyncio.sleep(15)
+    asyncio.ensure_future(send_timesheets())
 
     logging.info(f"Logged in as {bot.app.get_me()}.")
