@@ -153,3 +153,5 @@ async def send_timesheets():
         next_check = datetime.fromtimestamp(int(config.next_check))
         wait = (next_check - datetime.utcnow()).total_seconds()
         await asyncio.sleep(wait)
+        config.next_check = 0
+        config.store()
