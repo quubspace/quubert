@@ -18,14 +18,15 @@ from app import bot
 
 
 async def check_registration(ctx: lightbulb.Context, user_id: int):
-    user = await User.load(user_id=user_id)
-    if user is None:
-        await ctx.respond(
-            "You are not registered! Please verify before updating your profile."
-        )
-        return False
-    else:
+    try:
+        user = bot.user_data[user_id]
+
         return True
+    except Exception as e:
+        logging.info(f"Excepting, continuing to note unregistered user: {e}")
+        await ctx.respond("You are not registered! Please register using /verify.")
+
+        return False
 
 
 async def preload_user_data():
