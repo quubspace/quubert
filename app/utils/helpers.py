@@ -129,11 +129,20 @@ async def send_timesheets():
 
                 message += "\n"
 
-            with smtplib.SMTP_SSL(
-                config.smtp_host, config.email_port, context=context
-            ) as server:
-                server.login(config.sender_email, config.email_password)
-                server.sendmail(config.sender_email, config.receiver_email, message)
+            # Bit of a hack, but allows us to not use authentication for in-house email sending
+            if "smtp-relay" in config.smtp_host:
+                with smtplib.SMTP(config.smtp_host) as smtp:
+                    smtp.sendmail(
+                        from_addr=config.sender_email,
+                        to_addrs=config.receiver_email,
+                        msg=message,
+                    )
+            else:
+                with smtplib.SMTP_SSL(
+                    config.smtp_host, config.email_port, context=context
+                ) as server:
+                    server.login(config.sender_email, config.email_password)
+                    server.sendmail(config.sender_email, config.receiver_email, message)
         else:
             logging.info("No hours to send.")
 
