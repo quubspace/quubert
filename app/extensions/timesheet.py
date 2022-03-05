@@ -14,7 +14,7 @@ from app.utils.helpers import (
     query_hours,
     hours_to_export,
 )
-from hikari import Embed
+from hikari import Embed, Permissions
 
 timesheet = lightbulb.Plugin("Timesheet")
 
@@ -43,7 +43,7 @@ async def query(ctx: lightbulb.Context) -> None:
 
 
 @hours.child
-@lightbulb.add_checks(lightbulb.owner_only)
+@lightbulb.add_checks(lightbulb.has_role_permissions(Permissions.ADMINISTRATOR))
 @lightbulb.command(
     name="query_all",
     description="Check all users' hours. Usable only by owner.",
@@ -160,6 +160,14 @@ async def add(ctx: lightbulb.Context) -> None:
     )
 
     await query_hours(author_id=ctx.author.id, ctx=ctx)
+
+
+@bot.app.listen(lightbulb.CommandErrorEvent)
+async def on_error(event: lightbulb.CommandErrorEvent) -> None:
+    exception = event.exception.__cause__ or event.exception
+
+    if isinstance(exception, lightbulb.MissingRequiredPermission):
+        await event.context.respond("You are not an administrator.")
 
 
 def load(bot) -> None:
