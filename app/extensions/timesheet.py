@@ -5,9 +5,15 @@ import re
 import logging
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from app.hours import Hours
-from app.utils.helpers import check_registration, query_hours
+from app import bot
+from app.utils.helpers import (
+    check_registration,
+    preload_user_data,
+    query_hours,
+    hours_to_export,
+)
 from hikari import Embed
 
 timesheet = lightbulb.Plugin("Timesheet")
@@ -37,6 +43,60 @@ async def query(ctx: lightbulb.Context) -> None:
 
 
 @hours.child
+@lightbulb.add_checks(lightbulb.owner_only)
+@lightbulb.command(
+    name="query_all",
+    description="Check all users' hours. Usable only by owner.",
+    ephemeral=True,
+)
+@lightbulb.implements(lightbulb.SlashSubCommand)
+async def query_all(ctx: lightbulb.Context) -> None:
+    if hours_list := await hours_to_export():
+        message = f"Quub Timesheets for Week of {date.today() - timedelta(days=7)} to {date.today()}\n\n"
+
+        try:
+            # The bot object's users are not updating. This ensures the owner will always see the latest hours.
+            # Plus, this command isn't used that often.
+            user_data = await preload_user_data()
+            users_hours = {
+                user_id: tuple((user_data[user_id], [])) for (user_id, _) in hours_list
+            }
+        except Exception as e:
+            logging.warning(f"Cannot gather hours: {e}")
+            await ctx.respond("No registered users yet.")
+            return
+
+        for (user_id, hours) in hours_list:
+            users_hours[user_id][1].append(hours)
+
+        for (user, hours) in users_hours.values():
+            total_hours_min = sum([x.quantity for x in hours])
+            total_minutes = total_hours_min % 60
+            total_hours_num = total_hours_min // 60
+
+            total_quantity = f"{total_hours_num} hours and {total_minutes} minutes"
+
+            message += (
+                f"{user.name} has worked {total_quantity} this week. In detail:\n"
+            )
+
+            for entry in hours:
+                hours_min = entry.quantity
+                minutes = hours_min % 60
+                hours_num = hours_min // 60
+
+                quantity = f"{hours_num} hours and {minutes} minutes"
+
+                message += f"- {entry.date}: {quantity}, {entry.description if entry.description else 'no description provided'}\n"
+
+            message += "\n"
+
+        await ctx.respond(message)
+    else:
+        await ctx.respond("No hours recorded this week.")
+
+
+@hours.child
 @lightbulb.option(
     name="quantity", description="How many hours you worked.", type=str, required=True
 )
@@ -63,7 +123,7 @@ async def add(ctx: lightbulb.Context) -> None:
         await ctx.respond("Please enter a date in the valid format: YYYY-MM-DD!")
         return
 
-    if re.match("^-?\d+(:\d+)?$", ctx.options.quantity):
+    if re.match(r"^-?\d+(:\d+)?$", ctx.options.quantity):
         quantity = ctx.options.quantity.split(":")
 
         try:
